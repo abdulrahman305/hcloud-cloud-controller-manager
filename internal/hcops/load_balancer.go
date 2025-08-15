@@ -601,11 +601,11 @@ func (l *LoadBalancerOps) ReconcileHCLBTargets(
 		changed bool
 	)
 
-	usePrivateIP, err := l.getUsePrivateIP(svc)
+	privateIPEnabled, err := l.getPrivateIPEnabled(svc)
 	if err != nil {
 		return changed, fmt.Errorf("%s: %w", op, err)
 	}
-	if usePrivateIP && l.NetworkID == 0 {
+	if privateIPEnabled && l.NetworkID == 0 {
 		return changed, fmt.Errorf("%s: use private ip: missing network id", op)
 	}
 
@@ -645,6 +645,35 @@ func (l *LoadBalancerOps) ReconcileHCLBTargets(
 		}
 
 		for _, s := range dedicatedServers {
+			if privateIPEnabled {
+				node, ok := k8sNodes[int64(s.ServerNumber)]
+				if !ok {
+					continue
+				}
+
+				internalIP := getNodeInternalIP(node)
+				if internalIP != "" {
+					robotIPsToIDs[internalIP] = s.ServerNumber
+					robotIDToIPv4[s.ServerNumber] = internalIP
+					continue
+				}
+
+				klog.Warningf(
+					"%s: load balancer %s has set `use-private-ip: true`, but no InternalIP found for node %s. Continuing with ExternalIP.",
+					op,
+					svc.Name,
+					node.Name,
+				)
+				l.Recorder.Eventf(
+					svc,
+					corev1.EventTypeWarning,
+					"InternalIPNotConfigured",
+					"%s: load balancer has set `use-private-ip: true`, but no InternalIP found for node %s. Continuing with ExternalIP.",
+					op,
+					node.Name,
+				)
+			}
+
 			robotIPsToIDs[s.ServerIP] = s.ServerNumber
 			robotIDToIPv4[s.ServerNumber] = s.ServerIP
 		}
@@ -658,7 +687,7 @@ func (l *LoadBalancerOps) ReconcileHCLBTargets(
 	for _, target := range lb.Targets {
 		if target.Type == hcloud.LoadBalancerTargetTypeServer {
 			id := target.Server.Server.ID
-			recreate := target.UsePrivateIP != usePrivateIP
+			recreate := target.UsePrivateIP != privateIPEnabled
 			hclbTargetIDs[id] = k8sNodeIDsHCloud[id] && !recreate
 			if hclbTargetIDs[id] {
 				continue
@@ -748,7 +777,7 @@ func (l *LoadBalancerOps) ReconcileHCLBTargets(
 		klog.InfoS("add target", "op", op, "service", svc.ObjectMeta.Name, "targetName", node.Name)
 		opts := hcloud.LoadBalancerAddServerTargetOpts{
 			Server:       &hcloud.Server{ID: id},
-			UsePrivateIP: &usePrivateIP,
+			UsePrivateIP: &privateIPEnabled,
 		}
 		a, _, err := l.LBClient.AddServerTarget(ctx, lb, opts)
 		if err != nil {
@@ -789,7 +818,7 @@ func (l *LoadBalancerOps) ReconcileHCLBTargets(
 				continue
 			}
 
-			klog.InfoS("add target", "op", op, "service", svc.ObjectMeta.Name, "targetName", node, "ip", ip)
+			klog.InfoS("add target (robot node)", "op", op, "service", svc.ObjectMeta.Name, "targetName", node.Name, "ip", ip)
 			opts := hcloud.LoadBalancerAddIPTargetOpts{
 				IP: net.ParseIP(ip),
 			}
@@ -820,11 +849,11 @@ func (l *LoadBalancerOps) emitMaxTargetsReachedError(node *corev1.Node, svc *cor
 	klog.InfoS("cannot add server target because max number of targets have been reached", "op", op, "service", svc.ObjectMeta.Name, "targetName", node.Name)
 }
 
-func (l *LoadBalancerOps) getUsePrivateIP(svc *corev1.Service) (bool, error) {
+func (l *LoadBalancerOps) getPrivateIPEnabled(svc *corev1.Service) (bool, error) {
 	usePrivateIP, err := annotation.LBUsePrivateIP.BoolFromService(svc)
 	if err != nil {
 		if errors.Is(err, annotation.ErrNotSet) {
-			return l.Cfg.LoadBalancer.UsePrivateIP, nil
+			return l.Cfg.LoadBalancer.PrivateIPEnabled, nil
 		}
 		return false, err
 	}
@@ -1385,4 +1414,13 @@ func lbAttached(lb *hcloud.LoadBalancer, nwID int64, privateIPv4 string) bool {
 		}
 	}
 	return false
+}
+
+func getNodeInternalIP(node *corev1.Node) string {
+	for _, addr := range node.Status.Addresses {
+		if addr.Type == corev1.NodeInternalIP {
+			return addr.Address
+		}
+	}
+	return ""
 }

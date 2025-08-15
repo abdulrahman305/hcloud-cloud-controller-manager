@@ -23,7 +23,7 @@ builds:
       - -s
       - -w
       - -X github.com/hetznercloud/hcloud-cloud-controller-manager/hcloud.providerVersion={{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
-      - -X k8s.io/component-base/version.gitVersion={{ if not .IsSnapshot }}v{{ end }}{{ .Version }}
+      - -X k8s.io/component-base/version.gitVersion=v0.0.0-master+v{{ .Version }}
 
 dockers:
   - build_flag_templates: [--platform=linux/amd64]
@@ -53,8 +53,18 @@ docker_manifests:
       - hetznercloud/hcloud-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-arm64v8
       - hetznercloud/hcloud-cloud-controller-manager:{{ if not .IsSnapshot }}v{{ end }}{{ .Version }}-armv6
 
+archives:
+  - id: hcloud-cloud-controller-manager-archive
+    builds:
+      - hcloud-cloud-controller-manager
+    name_template: "{{ .Binary }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+      - README.md
+
 release:
-  ids: [""]
+  ids:
+    - hcloud-cloud-controller-manager-archive
   extra_files:
     - glob: ./deploy/ccm*.yaml
     - glob: ./hcloud-cloud-controller-manager-*.tgz

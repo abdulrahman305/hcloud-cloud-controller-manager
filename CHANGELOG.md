@@ -1,5 +1,107 @@
 # Changelog
 
+## [v1.27.0-alpha.1](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.27.0-alpha.1)
+
+This release introduces an experimental feature to address #395.
+
+### Watch-Based Route Reconciliation (Experimental)
+
+Currently, route reconciliation is performed at a fixed interval of 30s. This leads to unnecessary API requests, as a `GET /v1/networks/{id}` call is triggered every 30s, even when no changes have occurred.
+
+Upstream we have proposed an event-driven approach, similar to the mechanism used by other controllers such as the Load Balancer Controller. With this new approach, route reconciliation is triggered on node additions, node deletions, or when the `PodCIDRs` or `Addresses` of nodes change. Additionally, to ensure consistency, reconciliation will still occur periodically at a randomized interval between 12 and 24 hours.
+
+We are close to merging a Kubernetes Enhancement Proposal (KEP). Furthermore, a work-in-progress pull request containing the implementation is already open in the Kubernetes repository.
+
+#### Forked Upstream Libraries
+
+In this release, we replaced the upstream `controller-manager` and `cloud-provider` libraries with our own forks. These forks are based on the upstream `v0.33.2` release (aligned with Kubernetes v1.33.2) and include our patches on top.
+
+#### Enabling the Feature
+
+This feature is **disabled by default** and will not impact existing deployments unless explicitly enabled. We **do not recommend** running this feature in production environments at this stage. However, we welcome early testers who can try it in non-critical setups. Running with this feature active is enough for us to analyze its impact. No additional feedback is required.
+
+To enable the feature, set the following Helm value:
+
+`args.feature-gates=CloudControllerManagerWatchBasedRoutesReconciliation=true`
+
+### Bug Fixes
+
+- feature gate cannot be enabled (#980)
+
+## [v1.27.0-alpha.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.27.0-alpha.0)
+
+This release introduces an experimental feature to address #395.
+
+### Watch-Based Route Reconciliation (Experimental)
+
+Currently, route reconciliation is performed at a fixed interval of 30 seconds. This leads to unnecessary API requests, as a `GET /v1/networks/{id}` call is triggered every 30 seconds, even when no changes have occurred.
+
+Upstream we have proposed an event-driven approach, similar to the mechanism used by other controllers such as the Load Balancer Controller. With this new approach, route reconciliation is triggered on node additions, node deletions, or when the `PodCIDRs` or `Addresses` of nodes change. Additionally, to ensure consistency, reconciliation will still occur periodically at a randomized interval between 12 and 24 hours.
+
+We are close to merging a [Kubernetes Enhancement Proposal (KEP)](https://github.com/kubernetes/enhancements/pull/5289). Furthermore, a [work-in-progress pull request](https://github.com/kubernetes/kubernetes/pull/131220) containing the implementation is already open in the Kubernetes repository.
+
+#### Forked Upstream Libraries
+
+In this release, we replaced the upstream `controller-manager` and `cloud-provider` libraries with our own forks. These forks are based on the upstream `v0.33.2` release (aligned with Kubernetes v1.33.2) and include our patches on top.
+
+#### Enabling the Feature
+
+This feature is **disabled by default** and will not impact existing deployments unless explicitly enabled. We **do not recommend** running this feature in production environments at this stage. However, we welcome early testers who can try it in non-critical setups. Running with this feature active is enough for us to analyze its impact. No additional feedback is required.
+
+To enable the feature, set the following Helm value:
+
+`args.feature-gates=CloudControllerManagerWatchBasedRoutesReconciliation=true`
+
+### Features
+
+- watch-based route reconciliation (#970)
+
+## [v1.26.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.26.0)
+
+### Features
+
+- add Kubernetes v1.33 and remove EOL version v1.29 (#934)
+- **helm**: add value to disable ClusterRoleBinding for out-of-cluster install (#962)
+
+## [v1.25.1](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.25.1)
+
+### Bug Fixes
+
+- binaries are missing in the release (#930)
+
+## [v1.25.1-rc.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.25.1-rc.0)
+
+### Bug Fixes
+
+- binaries are missing in the release (#930)
+
+## [v1.25.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.25.0)
+
+### Features
+
+- **helm**: support custom priorityClassName (#908)
+- **helm**: support imagePullSecrets (#907)
+
+## [v1.24.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.24.0)
+
+### Improved Robot Support in hcloud-cloud-controller-manager
+
+The hcloud-cloud-controller-manager now forwards `InternalIPs` by default on Robot nodes when the `--node-ip` flag is used. If the provided IP is not already registered as an `ExternalIP` and matches the expected address family, it will be forwarded automatically during initialization.
+
+This allows the use of vSwitch IPs in private networks and Load Balancers.
+
+🔗 Learn more in our updated [Robot documentation](./docs/robot.md)
+📘 Follow our [how-to-guide](./docs/how-to-robot-vswitch-load-balancer.md) to set up Load Balancers with vSwitch IPs.
+
+### Features
+
+- **robot**: forward InternalIPs by default on Robot nodes (#865)
+- **load-balancer**: enable use-private-ip annotation for Robot servers (#898)
+
+### Bug Fixes
+
+- **load-balancer**: don&#39;t print entire node object when adding robot target (#904)
+
 ## [v1.23.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.23.0)
 
 ### Features

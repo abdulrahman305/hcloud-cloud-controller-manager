@@ -16,6 +16,13 @@ args:
   # https://github.com/hetznercloud/hcloud-cloud-controller-manager/issues/492
   webhook-secure-port: "0"
 
+  # Experimental feature, which enables route reconciliation based on the following Kubernetes events:
+  # - Node added
+  # - Node deleted
+  # - Node PodCIDRs, or Addresses updated
+  # This replaces the fixed route reconcile interval of 30s
+  feature-gates: "CloudControllerManagerWatchBasedRoutesReconciliation=false"
+
 # Change deployment kind from "Deployment" to "DaemonSet"
 kind: Deployment
 
@@ -61,6 +68,14 @@ env:
 image:
   repository: docker.io/hetznercloud/hcloud-cloud-controller-manager
   tag: "v{{ $.Chart.Version }}"
+  # Optionally specify an array of imagePullSecrets.
+  # Secrets must be manually created in the namespace.
+  # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  # e.g:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  #
+  pullSecrets: []
 
 monitoring:
   # When enabled, the hccm Pod will serve metrics on port :8233
@@ -113,9 +128,17 @@ nodeSelector: {}
 # Set the affinity for pods. (Only works with kind=Deployment)
 affinity: {}
 
+# pods priorityClassName
+# ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption
+priorityClassName: "system-cluster-critical"
+
 robot:
   # Set to true to enable support for Robot (Dedicated) servers.
   enabled: false
+
+rbac:
+  # Create a cluster role binding with admin access for the service account.
+  create: true
 
 podLabels: {}
 
