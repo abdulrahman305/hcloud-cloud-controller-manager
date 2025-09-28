@@ -19,10 +19,10 @@ jobs:
       fail-fast: false # Continue tests matrix if a flaky run occurs.
       matrix:
         k3s:
-          - v1.30
           - v1.31
           - v1.32
           - v1.33
+          - v1.34
 
     env:
       K3S_CHANNEL: ${{ matrix.k3s }}
@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -43,17 +43,17 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.5 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.10.6 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
-      - uses: yokawasa/action-setup-kube-tools@v0.11.2
+      - uses: yokawasa/action-setup-kube-tools@v0.13.1
         with:
           setup-tools: |
             helm
             kubectl
             skaffold
-          helm: v3.18.6 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.33.4 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          helm: v3.19.0 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.1 # renovate: datasource=github-releases depName=kubernetes/kubernetes
           skaffold: v2.16.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
@@ -144,7 +144,7 @@ jobs:
     environment: e2e-robot
 
     env:
-      K3S_CHANNEL: v1.32
+      K3S_CHANNEL: v1.34
       ENV: gha-${{ github.run_id }}-${{ github.run_attempt }}-robot
 
       ROBOT_ENABLED: "true"
@@ -152,7 +152,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
@@ -160,17 +160,17 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.5 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.10.6 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
-      - uses: yokawasa/action-setup-kube-tools@v0.11.2
+      - uses: yokawasa/action-setup-kube-tools@v0.13.1
         with:
           setup-tools: |
             helm
             kubectl
             skaffold
-          helm: v3.18.6 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.33.4 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          helm: v3.19.0 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.1 # renovate: datasource=github-releases depName=kubernetes/kubernetes
           skaffold: v2.16.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Install k3sup
