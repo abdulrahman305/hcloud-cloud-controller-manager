@@ -84,7 +84,9 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: "system:hcloud-cloud-controller-manager"
+  # The prefix ":restricted" originates from removing the cluster-admin role from HCCM.
+  # Renaming the ClusterRoleBinding makes the migration easier for users.
+  name: "system:hcloud-cloud-controller-manager:restricted"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -160,7 +162,7 @@ spec:
                   key: robot-user
                   name: hcloud
                   optional: true
-          image: docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.27.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.28.0 # x-releaser-pleaser-version
           ports:
             - name: metrics
               containerPort: 8233

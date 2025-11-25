@@ -1,5 +1,61 @@
 # Changelog
 
+## [v1.28.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.28.0)
+
+### Updated ClusterRole for HCCM
+
+We have introduced a custom `ClusterRole` for the HCCM component, based on the [upstream recommendation from sig-cloud-provider](https://kubernetes.io/docs/concepts/architecture/cloud-controller/#authorization-miscellaneous).
+
+To ensure a smooth transition, we renamed the `ClusterRoleBinding` by adding the `:restricted` suffix. This change was necessary because the `roleRef` field in a `ClusterRoleBinding` is immutable, which would otherwise cause errors during a Helm upgrade.
+
+As a result, users who deploy HCCM using the provided Kubernetes manifests must manually delete the old `ClusterRoleBinding` after applying the updated manifests. Users deploying via the Helm chart do **not** need to take any action.
+
+```bash
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io system:hcloud-cloud-controller-manager
+```
+
+### Features
+
+- **helm**: use custom ClusterRole
+- configurable metrics address (#1055)
+
+### Bug Fixes
+
+- add client-side timeouts to hcloud and robot clients (#1058)
+
+## [v1.28.0-rc.1](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.28.0-rc.1)
+
+### Updated ClusterRole for HCCM
+
+We have introduced a custom `ClusterRole` for the HCCM component, based on the [upstream recommendation from sig-cloud-provider](https://kubernetes.io/docs/concepts/architecture/cloud-controller/#authorization-miscellaneous).
+
+Due to this change, users who deploy HCCM using the provided Kubernetes manifests must manually remove the old ClusterRoleBinding after applying the updated manifests. Users deploying via the Helm chart do not need to perform any migration steps.
+
+```bash
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io system:hcloud-cloud-controller-manager
+```
+
+## [v1.28.0-rc.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.28.0-rc.0)
+
+### Updated ClusterRole for HCCM
+
+We have introduced a custom `ClusterRole` for the HCCM component, based on the [upstream recommendation from sig-cloud-provider](https://kubernetes.io/docs/concepts/architecture/cloud-controller/#authorization-miscellaneous).
+
+Because of this change, a simple `helm upgrade` may fail due to immutable fields in the existing `ClusterRoleBinding`. To ensure a successful upgrade, you must delete the existing `ClusterRoleBinding` before upgrading. **This will make HCCM temporarily unavailable until the new version is deployed. Please avoid making any changes to the clusters, especially node- or service-related modifications, during this time.**
+
+```bash
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io system:hcloud-cloud-controller-manager
+```
+
+### Features
+
+- **helm**: use custom ClusterRole
+- configurable metrics address (#1055)
+
+### Bug Fixes
+
+- add client-side timeouts to hcloud and robot clients (#1058)
+
 ## [v1.27.0](https://github.com/hetznercloud/hcloud-cloud-controller-manager/releases/tag/v1.27.0)
 
 ### Attach Load Balancer to a Subnet

@@ -1,11 +1,31 @@
-name: e2e tests
+---
+name: Tests
 on:
   pull_request: {}
   push:
     branches: [main]
 jobs:
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - run: go test -v -race -coverprofile=coverage.txt ./...
+
+      - uses: codecov/codecov-action@v5
+        if: >
+          !startsWith(github.head_ref, 'renovate/') &&
+          !startsWith(github.head_ref, 'releaser-pleaser--')
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unit
+
   cloud:
-    name: cloud ${{ matrix.k3s }}
+    name: e2e k8s-${{ matrix.k3s }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -33,7 +53,7 @@ jobs:
       CERT_DOMAIN: hc-integrations-test.de
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
@@ -43,7 +63,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.6 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.10.7 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: yokawasa/action-setup-kube-tools@v0.13.1
@@ -52,9 +72,9 @@ jobs:
             helm
             kubectl
             skaffold
-          helm: v3.19.0 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.34.1 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-          skaffold: v2.16.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
+          helm: v3.19.2 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.2 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
         env:
@@ -128,12 +148,13 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: debug-logs-${{ env.ENV }}
           path: debug-logs/
 
   robot:
+    name: e2e robot
     runs-on: ubuntu-latest
 
     permissions:
@@ -150,7 +171,7 @@ jobs:
       ROBOT_ENABLED: "true"
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-go@v6
         with:
@@ -160,7 +181,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.6 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.10.7 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: yokawasa/action-setup-kube-tools@v0.13.1
@@ -169,9 +190,9 @@ jobs:
             helm
             kubectl
             skaffold
-          helm: v3.19.0 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.34.1 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-          skaffold: v2.16.1 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
+          helm: v3.19.2 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.2 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Install k3sup
         run: |
@@ -250,7 +271,7 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: debug-logs-${{ env.ENV }}
           path: debug-logs/
