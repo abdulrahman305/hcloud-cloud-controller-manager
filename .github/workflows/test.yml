@@ -63,7 +63,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.7 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.11.1 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: yokawasa/action-setup-kube-tools@v0.13.1
@@ -72,8 +72,8 @@ jobs:
             helm
             kubectl
             skaffold
-          helm: v4.0.1 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.34.2 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          helm: v4.0.4 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.3 # renovate: datasource=github-releases depName=kubernetes/kubernetes
           skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Setup k3sup
@@ -148,7 +148,7 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: debug-logs-${{ env.ENV }}
           path: debug-logs/
@@ -181,7 +181,7 @@ jobs:
 
       - uses: opentofu/setup-opentofu@v1
         with:
-          tofu_version: v1.10.7 # renovate: datasource=github-releases depName=opentofu/opentofu
+          tofu_version: v1.11.1 # renovate: datasource=github-releases depName=opentofu/opentofu
           tofu_wrapper: false
 
       - uses: yokawasa/action-setup-kube-tools@v0.13.1
@@ -190,8 +190,8 @@ jobs:
             helm
             kubectl
             skaffold
-          helm: v4.0.1 # renovate: datasource=github-releases depName=helm/helm
-          kubectl: v1.34.2 # renovate: datasource=github-releases depName=kubernetes/kubernetes
+          helm: v4.0.4 # renovate: datasource=github-releases depName=helm/helm
+          kubectl: v1.34.3 # renovate: datasource=github-releases depName=kubernetes/kubernetes
           skaffold: v2.17.0 # renovate: datasource=github-releases depName=GoogleContainerTools/skaffold
 
       - name: Install k3sup
@@ -271,7 +271,7 @@ jobs:
       - name: Persist debug artifacts
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: debug-logs-${{ env.ENV }}
           path: debug-logs/
