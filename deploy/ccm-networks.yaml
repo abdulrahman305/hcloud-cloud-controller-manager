@@ -139,7 +139,7 @@ spec:
           args:
             - "--allow-untagged-cloud"
             - "--cloud-provider=hcloud"
-            - "--feature-gates=CloudControllerManagerWatchBasedRoutesReconciliation=false"
+            - "--feature-gates=CloudControllerManagerWatchBasedRoutesReconciliation=true"
             - "--route-reconciliation-period=30s"
             - "--webhook-secure-port=0"
             - "--allocate-node-cidrs=true"
@@ -168,7 +168,7 @@ spec:
                 secretKeyRef:
                   key: network
                   name: hcloud
-          image: docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.28.0 # x-releaser-pleaser-version
+          image: docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.29.0 # x-releaser-pleaser-version
           ports:
             - name: metrics
               containerPort: 8233
